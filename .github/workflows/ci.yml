@@ -18,7 +18,15 @@ jobs:
 
       - name: Install lint tools
         run: |
-          brew install swiftformat swiftlint
+          set -euo pipefail
+          brew install swiftlint
+          mkdir -p "$HOME/.local/bin"
+          curl -fsSL -o /tmp/swiftformat.zip https://github.com/nicklockwood/SwiftFormat/releases/download/0.58.7/swiftformat.zip
+          unzip -q /tmp/swiftformat.zip -d /tmp/swiftformat-bin
+          install /tmp/swiftformat-bin/swiftformat "$HOME/.local/bin/swiftformat"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          swiftformat --version
+          swiftlint version
 
       - name: Lint
         run: ./scripts/lint.sh
