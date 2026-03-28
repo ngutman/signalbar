@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint-build-test:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show toolchain versions
+        run: |
+          swift --version
+          xcodebuild -version
+
+      - name: Install lint tools
+        run: |
+          brew install swiftformat swiftlint
+
+      - name: Lint
+        run: ./scripts/lint.sh
+
+      - name: Shell syntax checks
+        run: |
+          bash -n run-menubar.sh
+          bash -n stop-menubar.sh
+          bash -n scripts/package_app.sh
+          bash -n scripts/sign_release.sh
+          bash -n scripts/verify_release.sh
+          bash -n scripts/release_local.sh
+          bash -n scripts/render_screenshots.sh
+
+      - name: Build
+        run: swift build
+
+      - name: Test
+        run: swift test

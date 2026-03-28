@@ -1,0 +1,29 @@
+# Local planning / agent notes
+.local/
+
+# SwiftPM / build outputs
+.build/
+.swiftpm/
+
+# App bundles and release artifacts
+*.app/
+dist/
+*.zip
+*.dmg
+*.pkg
+*.tar.gz
+*.tgz
+*.dSYM
+*.dSYM.zip
+
+# Editor / IDE
+.vscode/
+xcuserdata/
+DerivedData/
+
+# Environment / local overrides
+*.env.local
+*.local
+
+# macOS noise
+.DS_Store

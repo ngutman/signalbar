@@ -1,0 +1,54 @@
+name: Bug report
+description: Report a reproducible problem in SignalBar
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for filing a bug. Please include enough detail for someone else to reproduce it.
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      description: One-line description of the problem
+      placeholder: SignalBar shows DNS failed while lookups are succeeding
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Launch SignalBar
+        2. Configure a watched target
+        3. Open the menu
+        4. Observe...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: SignalBar version or commit
+      placeholder: 0.1.0 or abc1234
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version
+      placeholder: macOS 14.7 or macOS 15.0
+  - type: textarea
+    id: logs
+    attributes:
+      label: Additional context
+      description: Screenshots, logs, screenshots of the menu, or anything else helpful

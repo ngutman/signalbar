@@ -1,0 +1,14 @@
+--swiftversion 6.3
+--indent 4
+--linebreaks lf
+--maxwidth 120
+--stripunusedargs closure-only
+--wraparguments preserve
+--wrapcollections preserve
+--wrapparameters preserve
+--wrapconditions preserve
+--wraptypealiases preserve
+--closingparen same-line
+--commas inline
+--self remove
+--ifdef no-indent
