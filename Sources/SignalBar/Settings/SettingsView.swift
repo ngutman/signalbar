@@ -3,7 +3,7 @@ import SwiftUI
 
 @MainActor
 struct SettingsView: View {
-    static let preferredContentSize = CGSize(width: 520, height: 440)
+    static let preferredContentSize = CGSize(width: 640, height: 560)
 
     @Bindable var store: HealthStore
     @Bindable var selection: SettingsSelection

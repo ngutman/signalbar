@@ -9,6 +9,7 @@ public actor HealthEngine {
     private let httpHistoryLimit = 8
 
     private var watchedTarget: ProbeTarget?
+    private var cadenceConfiguration: ProbeCadenceConfiguration
     private var continuation: AsyncStream<HealthSnapshot>.Continuation?
     private var currentPath: PathSnapshot?
     private var dnsHistory: [UUID: [DNSProbeResult]] = [:]
@@ -27,13 +28,15 @@ public actor HealthEngine {
         dnsProbeRunner: any DNSProbing = DNSProbeRunner(),
         httpProbeRunner: any HTTPProbing = HTTPProbeRunner(),
         controlTargets: [ProbeTarget] = ProbeTarget.defaultControlTargets,
-        watchedTarget: ProbeTarget? = nil)
+        watchedTarget: ProbeTarget? = nil,
+        cadenceConfiguration: ProbeCadenceConfiguration = ProbeCadenceConfiguration())
     {
         self.pathMonitor = pathMonitor
         self.dnsProbeRunner = dnsProbeRunner
         self.httpProbeRunner = httpProbeRunner
         self.controlTargets = controlTargets
         self.watchedTarget = watchedTarget
+        self.cadenceConfiguration = cadenceConfiguration
     }
 
     public func start() -> AsyncStream<HealthSnapshot> {
@@ -45,7 +48,14 @@ public actor HealthEngine {
     public func updateWatchedTarget(_ watchedTarget: ProbeTarget?) {
         self.watchedTarget = watchedTarget
         pruneHistoryToActiveTargets()
+        restartSweepLoopsIfNeeded()
         emitSnapshot()
+    }
+
+    public func updateCadenceConfiguration(_ cadenceConfiguration: ProbeCadenceConfiguration) {
+        self.cadenceConfiguration = cadenceConfiguration
+        scheduler.updateCadenceConfiguration(cadenceConfiguration, among: activeTargetsForProbing(), now: .now)
+        restartSweepLoopsIfNeeded()
     }
 
     public func refreshNow() async {
@@ -56,10 +66,12 @@ public actor HealthEngine {
 
     public func pause() {
         isPaused = true
+        restartSweepLoopsIfNeeded()
     }
 
     public func resume() {
         isPaused = false
+        restartSweepLoopsIfNeeded()
     }
 
     public func historySnapshot(for window: HistoryWindow) -> HistorySnapshot {
@@ -81,30 +93,11 @@ public actor HealthEngine {
             }
         }
 
-        dnsLoopTask = Task {
-            while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(self.schedulerPollIntervalSeconds))
-                guard !Task.isCancelled else { break }
-                await self.performDNSSweepIfNeeded()
-            }
-        }
-
-        httpLoopTask = Task {
-            while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(self.schedulerPollIntervalSeconds))
-                guard !Task.isCancelled else { break }
-                await self.performHTTPSweepIfNeeded()
-            }
-        }
+        startSweepLoops()
 
         continuation.onTermination = { _ in
             Task { await self.stopInternal() }
         }
-    }
-
-    private var schedulerPollIntervalSeconds: Double {
-        let activeTargets = activeTargetsForProbing()
-        return activeTargets.map(\.interval).min() ?? 15
     }
 
     private func activeTargetsForProbing() -> [ProbeTarget] {
@@ -115,6 +108,50 @@ public actor HealthEngine {
         return targets
     }
 
+    private func startSweepLoops() {
+        dnsLoopTask?.cancel()
+        httpLoopTask?.cancel()
+        dnsLoopTask = makeSweepLoop(for: .dns)
+        httpLoopTask = makeSweepLoop(for: .http)
+    }
+
+    private func restartSweepLoopsIfNeeded() {
+        guard continuation != nil else { return }
+        startSweepLoops()
+    }
+
+    private func makeSweepLoop(for kind: ProbeScheduler.SweepKind) -> Task<Void, Never> {
+        Task {
+            while !Task.isCancelled {
+                guard let dueDate = await self.nextDueDate(for: kind) else {
+                    try? await Task.sleep(for: .seconds(1))
+                    continue
+                }
+
+                let sleepSeconds = max(0, dueDate.timeIntervalSinceNow)
+                if sleepSeconds > 0 {
+                    try? await Task.sleep(for: .seconds(sleepSeconds))
+                }
+                guard !Task.isCancelled else { break }
+
+                switch kind {
+                case .dns:
+                    await self.performDNSSweepIfNeeded()
+                case .http:
+                    await self.performHTTPSweepIfNeeded()
+                }
+            }
+        }
+    }
+
+    private func nextDueDate(for kind: ProbeScheduler.SweepKind) async -> Date? {
+        guard !isPaused else { return nil }
+        guard let currentPath, currentPath.status == .satisfied else { return nil }
+        let activeTargets = activeTargetsForProbing()
+        guard !activeTargets.isEmpty else { return nil }
+        return scheduler.nextDueDate(for: kind, among: activeTargets, now: .now)
+    }
+
     private func handlePathUpdate(_ path: PathSnapshot) async {
         currentPath = path
         if path.status != .satisfied {
@@ -122,17 +159,24 @@ public actor HealthEngine {
             httpHistory.removeAll()
             scheduler.reset()
             emitSnapshot()
+            restartSweepLoopsIfNeeded()
             return
         }
 
         emitSnapshot()
-        guard !isPaused else { return }
+        guard !isPaused else {
+            restartSweepLoopsIfNeeded()
+            return
+        }
+
         if dnsHistory.isEmpty {
-            await performDNSSweepIfNeeded()
+            await performDNSSweepIfNeeded(force: true)
         }
         if httpHistory.isEmpty {
-            await performHTTPSweepIfNeeded()
+            await performHTTPSweepIfNeeded(force: true)
         }
+
+        restartSweepLoopsIfNeeded()
     }
 
     private func performDNSSweepIfNeeded(force: Bool = false) async {
@@ -162,7 +206,12 @@ public actor HealthEngine {
         }
 
         guard let latestPath = self.currentPath, latestPath.status == .satisfied else { return }
-        scheduler.markCompleted(dueTargets, for: .dns, completedAt: .now)
+        let completionDate = Date.now
+        if force {
+            scheduler.markFullSweepCompleted(dueTargets, for: .dns, completedAt: completionDate)
+        } else {
+            scheduler.markCompleted(dueTargets, for: .dns, completedAt: completionDate)
+        }
         for result in probeResults {
             appendDNSResult(result)
         }
@@ -196,7 +245,12 @@ public actor HealthEngine {
         }
 
         guard let latestPath = self.currentPath, latestPath.status == .satisfied else { return }
-        scheduler.markCompleted(dueTargets, for: .http, completedAt: .now)
+        let completionDate = Date.now
+        if force {
+            scheduler.markFullSweepCompleted(dueTargets, for: .http, completedAt: completionDate)
+        } else {
+            scheduler.markCompleted(dueTargets, for: .http, completedAt: completionDate)
+        }
         for result in probeResults {
             appendHTTPResult(result)
         }

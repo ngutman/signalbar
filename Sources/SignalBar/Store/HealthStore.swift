@@ -16,6 +16,9 @@ final class HealthStore {
     var previewUpdatedAt: Date
     var currentDate: Date
     var isPaused: Bool
+    var refreshCadenceProfile: RefreshCadenceProfile
+    var customRefreshCadenceIntervalSeconds: Int
+    var lowPowerModeBackoffEnabled: Bool
     var displayMode: MenuBarDisplayMode
     var colorMode: MenuBarColorMode
     var launchAtLoginState: LaunchAtLoginState
@@ -54,10 +57,20 @@ final class HealthStore {
         previewUpdatedAt = updatedAt
         currentDate = updatedAt
         self.isPaused = isPaused ?? resolvedSettingsStore.isPaused
+        refreshCadenceProfile = resolvedSettingsStore.refreshCadenceProfile
+        customRefreshCadenceIntervalSeconds = resolvedSettingsStore.customRefreshCadenceIntervalSeconds
+        lowPowerModeBackoffEnabled = resolvedSettingsStore.lowPowerModeBackoffEnabled
         displayMode = resolvedSettingsStore.displayMode
         colorMode = resolvedSettingsStore.colorMode
         launchAtLoginState = resolvedLaunchAtLoginController.currentState()
         launchAtLoginErrorMessage = nil
+    }
+
+    var cadenceConfiguration: ProbeCadenceConfiguration {
+        ProbeCadenceConfiguration(
+            profile: refreshCadenceProfile,
+            customIntervalSeconds: customRefreshCadenceIntervalSeconds,
+            lowPowerModeBackoffEnabled: lowPowerModeBackoffEnabled)
     }
 
     deinit {

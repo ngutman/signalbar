@@ -1,4 +1,5 @@
 import Observation
+import SignalBarCore
 import SwiftUI
 
 @MainActor
@@ -21,6 +22,18 @@ struct SettingsGeneralPane: View {
                     store.resume()
                 }
             })
+    }
+
+    private var refreshCadenceBinding: Binding<RefreshCadenceProfile> {
+        Binding(
+            get: { store.refreshCadenceProfile },
+            set: { store.setRefreshCadenceProfile($0) })
+    }
+
+    private var customRefreshCadenceIntervalBinding: Binding<Int> {
+        Binding(
+            get: { store.customRefreshCadenceIntervalSeconds },
+            set: { store.setCustomRefreshCadenceIntervalSeconds($0) })
     }
 
     var body: some View {
@@ -62,8 +75,47 @@ struct SettingsGeneralPane: View {
 
                 SettingsSection(
                     title: "Monitoring",
-                    caption: "Keep quick actions in the menu, and use settings for persistent app behavior.")
+                    caption: "Choose how often SignalBar runs automatic DNS and internet probes. Manual refresh is always available.")
                 {
+                    SettingsPickerRow(
+                        title: "Refresh cadence",
+                        subtitle: refreshCadenceBinding.wrappedValue.detailText(
+                            customIntervalSeconds: store.customRefreshCadenceIntervalSeconds))
+                    {
+                        Picker("Refresh cadence", selection: refreshCadenceBinding) {
+                            ForEach(RefreshCadenceProfile.allCases, id: \.self) { profile in
+                                Text(profile.displayName).tag(profile)
+                            }
+                        }
+                        .labelsHidden()
+                        .pickerStyle(.menu)
+                        .frame(maxWidth: 200)
+                    }
+
+                    if store.refreshCadenceProfile == .custom {
+                        SettingsPickerRow(
+                            title: "Custom interval",
+                            subtitle: "Enter \(RefreshCadenceProfile.customIntervalRange.lowerBound)–\(RefreshCadenceProfile.customIntervalRange.upperBound) seconds. Applies to each default control target and the watched target. SignalBar staggers the default control targets across this interval.")
+                        {
+                            HStack(spacing: 8) {
+                                TextField("Seconds", value: customRefreshCadenceIntervalBinding, format: .number)
+                                    .textFieldStyle(.roundedBorder)
+                                    .frame(width: 72)
+
+                                Text("seconds")
+                                    .font(.footnote)
+                                    .foregroundStyle(.secondary)
+
+                                Stepper(
+                                    "Custom interval",
+                                    value: customRefreshCadenceIntervalBinding,
+                                    in: RefreshCadenceProfile.customIntervalRange,
+                                    step: 1)
+                                    .labelsHidden()
+                            }
+                        }
+                    }
+
                     SettingsToggleRow(
                         title: "Pause probing",
                         subtitle: "Stops automatic DNS and internet sweeps. Manual refresh still works while paused.",
@@ -89,7 +141,7 @@ struct SettingsGeneralPane: View {
                     title: "Coming later",
                     caption: "These settings are planned, but they should land only once the underlying behavior is implemented and tested.")
                 {
-                    Text("Notifications · refresh cadence / Low Power Mode behavior")
+                    Text("Notifications · Low Power Mode backoff behavior")
                         .font(.footnote)
                         .foregroundStyle(.tertiary)
                 }

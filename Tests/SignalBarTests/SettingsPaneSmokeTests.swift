@@ -26,6 +26,8 @@ final class SettingsPaneSmokeTests: XCTestCase {
 
         let store = HealthStore(userDefaults: defaults)
         store.pause()
+        store.setRefreshCadenceProfile(.custom)
+        store.setCustomRefreshCadenceIntervalSeconds(29)
         store.setDisplayMode(.semanticBars)
         store.setColorMode(.mutedAccent)
         store.setWatchedTarget(
@@ -40,6 +42,19 @@ final class SettingsPaneSmokeTests: XCTestCase {
         _ = SettingsGeneralPane(store: store).body
         _ = SettingsDisplayPane(store: store).body
         _ = SettingsTargetsPane(store: store).body
+    }
+
+    func test_settingsWindowControllerUsesExpandedPreferredSize() {
+        let defaults = UserDefaults(suiteName: #function)!
+        defaults.removePersistentDomain(forName: #function)
+
+        let store = HealthStore(userDefaults: defaults)
+        let controller = SettingsWindowController(store: store)
+
+        XCTAssertEqual(SettingsView.preferredContentSize.width, 640)
+        XCTAssertEqual(SettingsView.preferredContentSize.height, 560)
+        XCTAssertEqual(controller.window?.minSize.width, 640)
+        XCTAssertEqual(controller.window?.minSize.height, 560)
     }
 
     func test_buildsGeneralPaneWithLaunchAtLoginApprovalAndErrorStates() {

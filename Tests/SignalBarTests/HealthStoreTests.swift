@@ -149,6 +149,93 @@ final class HealthStoreTests: XCTestCase {
         XCTAssertTrue(secondStore.isPaused)
     }
 
+    func test_refreshCadenceProfileDefaultsToBalanced() {
+        let defaults = UserDefaults(suiteName: #function)!
+        defaults.removePersistentDomain(forName: #function)
+
+        let store = HealthStore(userDefaults: defaults)
+
+        XCTAssertEqual(store.refreshCadenceProfile, .balanced)
+    }
+
+    func test_refreshCadenceProfilePersistsAcrossStoreInstances() {
+        let suiteName = "HealthStoreTests-\(#function)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defaults.removePersistentDomain(forName: suiteName)
+
+        let firstStore = HealthStore(userDefaults: defaults)
+        firstStore.setRefreshCadenceProfile(.powerSaver)
+
+        let secondStore = HealthStore(userDefaults: defaults)
+        XCTAssertEqual(secondStore.refreshCadenceProfile, .powerSaver)
+    }
+
+    func test_customRefreshCadenceIntervalDefaultsToBalancedInterval() {
+        let defaults = UserDefaults(suiteName: #function)!
+        defaults.removePersistentDomain(forName: #function)
+
+        let store = HealthStore(userDefaults: defaults)
+
+        XCTAssertEqual(store.customRefreshCadenceIntervalSeconds, 15)
+    }
+
+    func test_customRefreshCadenceIntervalPersistsAcrossStoreInstances() {
+        let suiteName = "HealthStoreTests-\(#function)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defaults.removePersistentDomain(forName: suiteName)
+
+        let firstStore = HealthStore(userDefaults: defaults)
+        firstStore.setCustomRefreshCadenceIntervalSeconds(23)
+
+        let secondStore = HealthStore(userDefaults: defaults)
+        XCTAssertEqual(secondStore.customRefreshCadenceIntervalSeconds, 23)
+    }
+
+    func test_cadenceConfigurationUsesCustomIntervalWhenCustomProfileSelected() {
+        let defaults = UserDefaults(suiteName: #function)!
+        defaults.removePersistentDomain(forName: #function)
+
+        let store = HealthStore(userDefaults: defaults)
+        store.setRefreshCadenceProfile(.custom)
+        store.setCustomRefreshCadenceIntervalSeconds(24)
+
+        XCTAssertEqual(store.cadenceConfiguration.profile, .custom)
+        XCTAssertEqual(store.cadenceConfiguration.customIntervalSeconds, 24)
+    }
+
+    func test_customRefreshCadenceIntervalClampsToSupportedRange() {
+        let defaults = UserDefaults(suiteName: #function)!
+        defaults.removePersistentDomain(forName: #function)
+
+        let store = HealthStore(userDefaults: defaults)
+        store.setCustomRefreshCadenceIntervalSeconds(1)
+        XCTAssertEqual(store.customRefreshCadenceIntervalSeconds, RefreshCadenceProfile.customIntervalRange.lowerBound)
+
+        store.setCustomRefreshCadenceIntervalSeconds(999)
+        XCTAssertEqual(store.customRefreshCadenceIntervalSeconds, RefreshCadenceProfile.customIntervalRange.upperBound)
+    }
+
+    func test_lowPowerModeBackoffDefaultsToEnabled() {
+        let defaults = UserDefaults(suiteName: #function)!
+        defaults.removePersistentDomain(forName: #function)
+
+        let store = HealthStore(userDefaults: defaults)
+
+        XCTAssertTrue(store.lowPowerModeBackoffEnabled)
+    }
+
+    func test_lowPowerModeBackoffPersistsAcrossStoreInstances() {
+        let suiteName = "HealthStoreTests-\(#function)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defaults.removePersistentDomain(forName: suiteName)
+
+        let firstStore = HealthStore(userDefaults: defaults)
+        firstStore.setLowPowerModeBackoffEnabled(false)
+
+        let secondStore = HealthStore(userDefaults: defaults)
+        XCTAssertFalse(secondStore.lowPowerModeBackoffEnabled)
+    }
+
     func test_launchAtLoginStateDefaultsFromInjectedController() {
         let defaults = UserDefaults(suiteName: #function)!
         defaults.removePersistentDomain(forName: #function)

@@ -14,6 +14,7 @@ The repository is intended to be usable, buildable, and reviewable in public, bu
 - derived quality classification from latency, jitter, and reliability
 - watched-target support with a dedicated settings window editor
 - rolling in-memory history graphs
+- refresh cadence presets plus a custom manual interval from the General settings pane
 - pause/resume probing
 - launch at login from the General settings pane
 - stale-state dimming
@@ -35,13 +36,13 @@ The following areas are still incomplete or expected to evolve:
 - richer target configuration UX
 - persistent history storage
 - fully GitHub-hosted release automation without local operator involvement
-- more advanced scheduler/backoff behavior
+- Low Power Mode cadence backoff and other more advanced scheduler/adaptive behavior
 - broader documentation and user onboarding polish over time
 
 ## Near-term priorities
 
 1. continue runtime orchestration cleanup
-2. improve scheduler/backoff behavior
+2. add Low Power Mode cadence backoff and more advanced adaptive scheduler behavior
 3. add optional GitHub-hosted release automation later
 4. add persistent history
 5. continue UI and configuration polish

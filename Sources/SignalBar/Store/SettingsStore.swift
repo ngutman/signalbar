@@ -9,6 +9,9 @@ final class SettingsStore {
     private static let historyMetricDefaultsKey = "historyMetric"
     private static let watchedTargetDefaultsKey = "watchedTarget"
     private static let pausedDefaultsKey = "isPaused"
+    private static let refreshCadenceProfileDefaultsKey = "refreshCadenceProfile"
+    private static let customRefreshCadenceIntervalSecondsDefaultsKey = "customRefreshCadenceIntervalSeconds"
+    private static let lowPowerModeBackoffEnabledDefaultsKey = "lowPowerModeBackoffEnabled"
 
     private let userDefaults: UserDefaults
 
@@ -18,6 +21,9 @@ final class SettingsStore {
     private(set) var displayMode: MenuBarDisplayMode
     private(set) var colorMode: MenuBarColorMode
     private(set) var isPaused: Bool
+    private(set) var refreshCadenceProfile: RefreshCadenceProfile
+    private(set) var customRefreshCadenceIntervalSeconds: Int
+    private(set) var lowPowerModeBackoffEnabled: Bool
 
     init(userDefaults: UserDefaults = .standard) {
         self.userDefaults = userDefaults
@@ -27,6 +33,9 @@ final class SettingsStore {
         displayMode = Self.loadDisplayMode(from: userDefaults)
         colorMode = Self.loadColorMode(from: userDefaults)
         isPaused = Self.loadIsPaused(from: userDefaults)
+        refreshCadenceProfile = Self.loadRefreshCadenceProfile(from: userDefaults)
+        customRefreshCadenceIntervalSeconds = Self.loadCustomRefreshCadenceIntervalSeconds(from: userDefaults)
+        lowPowerModeBackoffEnabled = Self.loadLowPowerModeBackoffEnabled(from: userDefaults)
     }
 
     func setWatchedTarget(_ watchedTarget: ProbeTarget?) {
@@ -57,6 +66,22 @@ final class SettingsStore {
     func setPaused(_ isPaused: Bool) {
         self.isPaused = isPaused
         userDefaults.set(isPaused, forKey: Self.pausedDefaultsKey)
+    }
+
+    func setRefreshCadenceProfile(_ refreshCadenceProfile: RefreshCadenceProfile) {
+        self.refreshCadenceProfile = refreshCadenceProfile
+        userDefaults.set(refreshCadenceProfile.rawValue, forKey: Self.refreshCadenceProfileDefaultsKey)
+    }
+
+    func setCustomRefreshCadenceIntervalSeconds(_ customRefreshCadenceIntervalSeconds: Int) {
+        let clampedIntervalSeconds = ProbeCadenceConfiguration.clampCustomIntervalSeconds(customRefreshCadenceIntervalSeconds)
+        self.customRefreshCadenceIntervalSeconds = clampedIntervalSeconds
+        userDefaults.set(clampedIntervalSeconds, forKey: Self.customRefreshCadenceIntervalSecondsDefaultsKey)
+    }
+
+    func setLowPowerModeBackoffEnabled(_ lowPowerModeBackoffEnabled: Bool) {
+        self.lowPowerModeBackoffEnabled = lowPowerModeBackoffEnabled
+        userDefaults.set(lowPowerModeBackoffEnabled, forKey: Self.lowPowerModeBackoffEnabledDefaultsKey)
     }
 
     private static func loadDisplayMode(from userDefaults: UserDefaults) -> MenuBarDisplayMode {
@@ -102,6 +127,30 @@ final class SettingsStore {
 
     private static func loadIsPaused(from userDefaults: UserDefaults) -> Bool {
         userDefaults.bool(forKey: pausedDefaultsKey)
+    }
+
+    private static func loadRefreshCadenceProfile(from userDefaults: UserDefaults) -> RefreshCadenceProfile {
+        guard let rawValue = userDefaults.string(forKey: refreshCadenceProfileDefaultsKey),
+              let refreshCadenceProfile = RefreshCadenceProfile(rawValue: rawValue)
+        else {
+            return .defaultValue
+        }
+        return refreshCadenceProfile
+    }
+
+    private static func loadCustomRefreshCadenceIntervalSeconds(from userDefaults: UserDefaults) -> Int {
+        let storedValue = userDefaults.integer(forKey: customRefreshCadenceIntervalSecondsDefaultsKey)
+        if storedValue == 0 {
+            return RefreshCadenceProfile.defaultCustomIntervalSeconds
+        }
+        return ProbeCadenceConfiguration.clampCustomIntervalSeconds(storedValue)
+    }
+
+    private static func loadLowPowerModeBackoffEnabled(from userDefaults: UserDefaults) -> Bool {
+        if userDefaults.object(forKey: lowPowerModeBackoffEnabledDefaultsKey) == nil {
+            return true
+        }
+        return userDefaults.bool(forKey: lowPowerModeBackoffEnabledDefaultsKey)
     }
 
     private static func storeWatchedTarget(_ watchedTarget: ProbeTarget?, in userDefaults: UserDefaults) {

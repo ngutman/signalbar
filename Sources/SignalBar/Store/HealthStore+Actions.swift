@@ -7,6 +7,7 @@ extension HealthStore {
         startClock()
         engineTask = Task { @MainActor [weak self] in
             guard let self else { return }
+            await healthEngine.updateCadenceConfiguration(cadenceConfiguration)
             await healthEngine.updateWatchedTarget(watchedTarget)
             if isPaused {
                 await healthEngine.pause()
@@ -93,6 +94,34 @@ extension HealthStore {
         Task {
             await self.healthEngine.resume()
             await self.healthEngine.refreshNow()
+        }
+    }
+
+    func setRefreshCadenceProfile(_ refreshCadenceProfile: RefreshCadenceProfile) {
+        guard self.refreshCadenceProfile != refreshCadenceProfile else { return }
+        self.refreshCadenceProfile = refreshCadenceProfile
+        settingsStore.setRefreshCadenceProfile(refreshCadenceProfile)
+        Task {
+            await self.healthEngine.updateCadenceConfiguration(self.cadenceConfiguration)
+        }
+    }
+
+    func setCustomRefreshCadenceIntervalSeconds(_ customRefreshCadenceIntervalSeconds: Int) {
+        let clampedIntervalSeconds = ProbeCadenceConfiguration.clampCustomIntervalSeconds(customRefreshCadenceIntervalSeconds)
+        guard self.customRefreshCadenceIntervalSeconds != clampedIntervalSeconds else { return }
+        self.customRefreshCadenceIntervalSeconds = clampedIntervalSeconds
+        settingsStore.setCustomRefreshCadenceIntervalSeconds(clampedIntervalSeconds)
+        Task {
+            await self.healthEngine.updateCadenceConfiguration(self.cadenceConfiguration)
+        }
+    }
+
+    func setLowPowerModeBackoffEnabled(_ lowPowerModeBackoffEnabled: Bool) {
+        guard self.lowPowerModeBackoffEnabled != lowPowerModeBackoffEnabled else { return }
+        self.lowPowerModeBackoffEnabled = lowPowerModeBackoffEnabled
+        settingsStore.setLowPowerModeBackoffEnabled(lowPowerModeBackoffEnabled)
+        Task {
+            await self.healthEngine.updateCadenceConfiguration(self.cadenceConfiguration)
         }
     }
 

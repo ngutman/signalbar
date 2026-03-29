@@ -16,6 +16,9 @@ final class SettingsStoreTests: XCTestCase {
         XCTAssertEqual(store.historyMetric, .ping)
         XCTAssertNil(store.watchedTarget)
         XCTAssertFalse(store.isPaused)
+        XCTAssertEqual(store.refreshCadenceProfile, .balanced)
+        XCTAssertEqual(store.customRefreshCadenceIntervalSeconds, 15)
+        XCTAssertTrue(store.lowPowerModeBackoffEnabled)
     }
 
     func test_changesPersistAcrossInstances() {
@@ -39,6 +42,9 @@ final class SettingsStoreTests: XCTestCase {
         first.setHistoryMetric(.jitter)
         first.setWatchedTarget(watchedTarget)
         first.setPaused(true)
+        first.setRefreshCadenceProfile(.custom)
+        first.setCustomRefreshCadenceIntervalSeconds(27)
+        first.setLowPowerModeBackoffEnabled(false)
 
         let second = SettingsStore(userDefaults: defaults)
         XCTAssertEqual(second.displayMode, .semanticBars)
@@ -47,5 +53,8 @@ final class SettingsStoreTests: XCTestCase {
         XCTAssertEqual(second.historyMetric, .jitter)
         XCTAssertEqual(second.watchedTarget?.name, "GitHub")
         XCTAssertTrue(second.isPaused)
+        XCTAssertEqual(second.refreshCadenceProfile, .custom)
+        XCTAssertEqual(second.customRefreshCadenceIntervalSeconds, 27)
+        XCTAssertFalse(second.lowPowerModeBackoffEnabled)
     }
 }

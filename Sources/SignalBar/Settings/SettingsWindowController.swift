@@ -17,7 +17,9 @@ final class SettingsWindowController: NSWindowController, NSWindowDelegate {
         window.setContentSize(NSSize(
             width: SettingsView.preferredContentSize.width,
             height: SettingsView.preferredContentSize.height))
-        window.minSize = NSSize(width: SettingsView.preferredContentSize.width, height: 360)
+        window.minSize = NSSize(
+            width: SettingsView.preferredContentSize.width,
+            height: SettingsView.preferredContentSize.height)
         window.center()
         window.isReleasedWhenClosed = false
         window.toolbarStyle = .preference

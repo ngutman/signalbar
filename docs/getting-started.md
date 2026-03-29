@@ -12,6 +12,7 @@ The current build includes:
 - derived quality signals from latency, jitter, and reliability
 - rolling in-memory timeline history
 - watched target support
+- refresh cadence presets plus a custom manual interval from `Settings… -> General`
 - launch at login from `Settings… -> General`
 - a dedicated settings window for display, targets, and app-level preferences
 - source-based packaging, signing, and local release verification scripts
@@ -90,7 +91,8 @@ When the app launches:
 - clicking the icon opens a diagnosis-first overview card
 - persistent preferences live under `Settings…`
 - launch at login is available from `Settings… -> General`
-- the chosen display mode, color style, watched target, and paused state are persisted between launches
+- refresh cadence is available from `Settings… -> General -> Monitoring`, including a `Custom` manual interval
+- the chosen refresh cadence, custom interval, display mode, color style, watched target, and paused state are persisted between launches
 - launch-at-login state is managed by macOS Login Items rather than a separate SignalBar preference
 
 ## History views
@@ -133,7 +135,7 @@ When the core internet path looks healthy but the watched target fails, SignalBa
 ## Settings window
 
 The current settings window includes:
-- **General** — launch at login, pause probing, and app behavior notes
+- **General** — launch at login, refresh cadence including `Custom`, pause probing, and app behavior notes
 - **Display** — toolbar icon and color style
 - **Targets** — watched-target configuration
 - **About** — app links and build/version information
