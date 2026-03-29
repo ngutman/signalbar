@@ -18,9 +18,12 @@ final class HealthStore {
     var isPaused: Bool
     var displayMode: MenuBarDisplayMode
     var colorMode: MenuBarColorMode
+    var launchAtLoginState: LaunchAtLoginState
+    var launchAtLoginErrorMessage: String?
 
     @ObservationIgnored let settingsStore: SettingsStore
     @ObservationIgnored let healthEngine: HealthEngine
+    @ObservationIgnored let launchAtLoginController: any LaunchAtLoginControlling
     @ObservationIgnored let freshnessPolicy = SnapshotFreshnessPolicy()
     @ObservationIgnored var engineTask: Task<Void, Never>?
     @ObservationIgnored var clockTask: Task<Void, Never>?
@@ -32,11 +35,14 @@ final class HealthStore {
         isPaused: Bool? = nil,
         healthEngine: HealthEngine = HealthEngine(),
         userDefaults: UserDefaults = .standard,
-        settingsStore: SettingsStore? = nil)
+        settingsStore: SettingsStore? = nil,
+        launchAtLoginController: (any LaunchAtLoginControlling)? = nil)
     {
         let resolvedSettingsStore = settingsStore ?? SettingsStore(userDefaults: userDefaults)
+        let resolvedLaunchAtLoginController = launchAtLoginController ?? LaunchAtLoginController()
         self.settingsStore = resolvedSettingsStore
         self.healthEngine = healthEngine
+        self.launchAtLoginController = resolvedLaunchAtLoginController
         self.sourceMode = sourceMode ?? .livePath
         self.previewScenario = previewScenario
         watchedTarget = resolvedSettingsStore.watchedTarget
@@ -50,6 +56,8 @@ final class HealthStore {
         self.isPaused = isPaused ?? resolvedSettingsStore.isPaused
         displayMode = resolvedSettingsStore.displayMode
         colorMode = resolvedSettingsStore.colorMode
+        launchAtLoginState = resolvedLaunchAtLoginController.currentState()
+        launchAtLoginErrorMessage = nil
     }
 
     deinit {

@@ -2,10 +2,12 @@ import AppKit
 import SwiftUI
 
 @MainActor
-final class SettingsWindowController: NSWindowController {
+final class SettingsWindowController: NSWindowController, NSWindowDelegate {
+    private let store: HealthStore
     private let selection: SettingsSelection
 
     init(store: HealthStore, selection: SettingsSelection = SettingsSelection()) {
+        self.store = store
         self.selection = selection
 
         let hostingController = NSHostingController(rootView: SettingsView(store: store, selection: selection))
@@ -22,6 +24,7 @@ final class SettingsWindowController: NSWindowController {
         window.setFrameAutosaveName("SignalBarSettingsWindow")
 
         super.init(window: window)
+        window.delegate = self
         shouldCascadeWindows = true
     }
 
@@ -32,8 +35,13 @@ final class SettingsWindowController: NSWindowController {
 
     func show(tab: SettingsTab = .general) {
         selection.tab = tab
+        store.refreshLaunchAtLoginState()
         showWindow(nil)
         window?.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
+    }
+
+    func windowDidBecomeKey(_ notification: Notification) {
+        store.refreshLaunchAtLoginState()
     }
 }

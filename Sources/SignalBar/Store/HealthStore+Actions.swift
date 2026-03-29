@@ -60,6 +60,21 @@ extension HealthStore {
         }
     }
 
+    func refreshLaunchAtLoginState() {
+        launchAtLoginState = launchAtLoginController.currentState()
+        launchAtLoginErrorMessage = nil
+    }
+
+    func setLaunchAtLoginEnabled(_ isEnabled: Bool) {
+        let result = launchAtLoginController.setEnabled(isEnabled)
+        launchAtLoginState = result.state
+        launchAtLoginErrorMessage = result.errorMessage
+    }
+
+    func openLaunchAtLoginSystemSettings() {
+        launchAtLoginController.openSystemSettingsLoginItems()
+    }
+
     func pause() {
         guard !isPaused else { return }
         isPaused = true

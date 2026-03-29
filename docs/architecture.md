@@ -89,6 +89,9 @@ Owns the `NSStatusItem`, menu rebuilds, quick actions, and the handoff into the 
 ### `SettingsWindowController`
 Owns the dedicated AppKit-backed settings window that hosts the SwiftUI settings panes.
 
+### `LaunchAtLoginController`
+Wraps `SMAppService.mainApp` so the store and settings UI can manage launch-at-login state without talking to Service Management directly from SwiftUI views.
+
 ### `ToolbarVisualStateBuilder`
 Maps domain snapshots and one-minute history into the compact toolbar icon contract.
 

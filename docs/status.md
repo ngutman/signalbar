@@ -15,6 +15,7 @@ The repository is intended to be usable, buildable, and reviewable in public, bu
 - watched-target support with a dedicated settings window editor
 - rolling in-memory history graphs
 - pause/resume probing
+- launch at login from the General settings pane
 - stale-state dimming
 - source-based packaging, signing, notarization, verification, and local GitHub release scripts
 

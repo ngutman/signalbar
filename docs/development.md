@@ -77,6 +77,8 @@ If launch behavior changed:
 ./run-menubar.sh
 ```
 
+If launch-at-login behavior changed, validate it from a packaged app bundle such as `dist/SignalBar.app` produced by `./scripts/release_local.sh`, not from the bare SwiftPM binary launched by `./run-menubar.sh`.
+
 If release scripts changed:
 ```bash
 bash -n scripts/package_app.sh

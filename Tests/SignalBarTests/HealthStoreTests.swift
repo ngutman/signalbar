@@ -149,6 +149,62 @@ final class HealthStoreTests: XCTestCase {
         XCTAssertTrue(secondStore.isPaused)
     }
 
+    func test_launchAtLoginStateDefaultsFromInjectedController() {
+        let defaults = UserDefaults(suiteName: #function)!
+        defaults.removePersistentDomain(forName: #function)
+        let controller = FakeLaunchAtLoginController(state: .enabled)
+
+        let store = HealthStore(userDefaults: defaults, launchAtLoginController: controller)
+
+        XCTAssertEqual(store.launchAtLoginState, .enabled)
+        XCTAssertNil(store.launchAtLoginErrorMessage)
+    }
+
+    func test_setLaunchAtLoginEnabledUpdatesStateAndErrorMessageFromController() {
+        let defaults = UserDefaults(suiteName: #function)!
+        defaults.removePersistentDomain(forName: #function)
+        let controller = FakeLaunchAtLoginController(state: .disabled)
+        controller.setEnabledHandler = { _, controller in
+            controller.state = .requiresApproval
+            return LaunchAtLoginActionResult(
+                state: .requiresApproval,
+                errorMessage: "Approval is still required in System Settings.")
+        }
+
+        let store = HealthStore(userDefaults: defaults, launchAtLoginController: controller)
+        store.setLaunchAtLoginEnabled(true)
+
+        XCTAssertEqual(controller.requestedEnabledValues, [true])
+        XCTAssertEqual(store.launchAtLoginState, .requiresApproval)
+        XCTAssertEqual(store.launchAtLoginErrorMessage, "Approval is still required in System Settings.")
+    }
+
+    func test_refreshLaunchAtLoginStateClearsPreviousErrorAndReadsControllerState() {
+        let defaults = UserDefaults(suiteName: #function)!
+        defaults.removePersistentDomain(forName: #function)
+        let controller = FakeLaunchAtLoginController(state: .disabled)
+
+        let store = HealthStore(userDefaults: defaults, launchAtLoginController: controller)
+        store.launchAtLoginErrorMessage = "Previous failure"
+        controller.state = .enabled
+
+        store.refreshLaunchAtLoginState()
+
+        XCTAssertEqual(store.launchAtLoginState, .enabled)
+        XCTAssertNil(store.launchAtLoginErrorMessage)
+    }
+
+    func test_openLaunchAtLoginSystemSettingsDelegatesToController() {
+        let defaults = UserDefaults(suiteName: #function)!
+        defaults.removePersistentDomain(forName: #function)
+        let controller = FakeLaunchAtLoginController(state: .disabled)
+
+        let store = HealthStore(userDefaults: defaults, launchAtLoginController: controller)
+        store.openLaunchAtLoginSystemSettings()
+
+        XCTAssertEqual(controller.openSystemSettingsCalls, 1)
+    }
+
     func test_toolbarStateDimsWhenLiveSnapshotIsPastFreshnessThreshold() {
         let defaults = UserDefaults(suiteName: #function)!
         defaults.removePersistentDomain(forName: #function)
@@ -230,5 +286,36 @@ final class HealthStoreTests: XCTestCase {
             medianLatencyMs: 22,
             jitterMs: 14,
             reliability: 1)
+    }
+}
+
+@MainActor
+private final class FakeLaunchAtLoginController: LaunchAtLoginControlling {
+    var state: LaunchAtLoginState
+    var setEnabledHandler: ((Bool, FakeLaunchAtLoginController) -> LaunchAtLoginActionResult)?
+    private(set) var requestedEnabledValues: [Bool] = []
+    private(set) var openSystemSettingsCalls = 0
+
+    init(state: LaunchAtLoginState) {
+        self.state = state
+    }
+
+    func currentState() -> LaunchAtLoginState {
+        state
+    }
+
+    func setEnabled(_ isEnabled: Bool) -> LaunchAtLoginActionResult {
+        requestedEnabledValues.append(isEnabled)
+
+        if let setEnabledHandler {
+            return setEnabledHandler(isEnabled, self)
+        }
+
+        state = isEnabled ? .enabled : .disabled
+        return LaunchAtLoginActionResult(state: state, errorMessage: nil)
+    }
+
+    func openSystemSettingsLoginItems() {
+        openSystemSettingsCalls += 1
     }
 }

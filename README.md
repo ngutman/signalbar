@@ -46,6 +46,7 @@ SignalBar currently includes:
 - rolling in-memory history graphs
 - two toolbar display modes
 - two toolbar color modes
+- launch at login from `Settings… -> General`
 - a dedicated settings window for display, watched-target, and app-level preferences
 - focused tests for diagnosis, aggregation, history, store behavior, and UI mapping
 

@@ -41,4 +41,19 @@ final class SettingsPaneSmokeTests: XCTestCase {
         _ = SettingsDisplayPane(store: store).body
         _ = SettingsTargetsPane(store: store).body
     }
+
+    func test_buildsGeneralPaneWithLaunchAtLoginApprovalAndErrorStates() {
+        let defaults = UserDefaults(suiteName: #function)!
+        defaults.removePersistentDomain(forName: #function)
+
+        let store = HealthStore(userDefaults: defaults)
+        store.launchAtLoginState = .requiresApproval
+        store.launchAtLoginErrorMessage = "Approval is still required in System Settings."
+        _ = SettingsGeneralPane(store: store).body
+
+        store.launchAtLoginState = .unavailable(
+            "Launch at login is only available from the packaged SignalBar.app bundle.")
+        store.launchAtLoginErrorMessage = nil
+        _ = SettingsGeneralPane(store: store).body
+    }
 }

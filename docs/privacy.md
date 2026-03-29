@@ -30,6 +30,7 @@ SignalBar currently does **not**:
 - inspect application traffic
 - require root privileges
 - run invasive background daemons
+- add a helper launcher app for login-item support
 - perform bandwidth or speed tests
 
 ## Local storage
@@ -40,6 +41,8 @@ Today, SignalBar stores only lightweight local preferences such as:
 - selected history metric/window
 - paused state
 - optional watched target configuration
+
+If you enable **Launch at login**, that registration is managed by macOS Login Items via the system Service Management APIs rather than as a separate SignalBar `UserDefaults` preference.
 
 Current history is in-memory only and is not persisted across app restarts.
 
