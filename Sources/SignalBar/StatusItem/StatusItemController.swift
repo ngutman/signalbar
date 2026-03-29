@@ -8,6 +8,7 @@ final class StatusItemController: NSObject, NSMenuDelegate {
 
     let store: HealthStore
     private let statusBar: NSStatusBar
+    let openSettingsHandler: () -> Void
     lazy var statusItem: NSStatusItem = {
         let item = self.statusBar.statusItem(withLength: NSStatusItem.squareLength)
         item.button?.imageScaling = .scaleNone
@@ -22,9 +23,14 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         return menu
     }()
 
-    init(store: HealthStore, statusBar: NSStatusBar = .system) {
+    init(
+        store: HealthStore,
+        statusBar: NSStatusBar = .system,
+        openSettingsHandler: @escaping () -> Void = {})
+    {
         self.store = store
         self.statusBar = statusBar
+        self.openSettingsHandler = openSettingsHandler
         super.init()
         rebuildMenu()
         statusItem.menu = menu

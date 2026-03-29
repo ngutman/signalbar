@@ -3,7 +3,7 @@
 SignalBar is split into two main Swift modules:
 
 - `SignalBarCore` — domain models, path monitoring, probing, aggregation, history, and diagnosis
-- `SignalBar` — app lifecycle, store layer, status item integration, toolbar icon rendering, and menu UI
+- `SignalBar` — app lifecycle, store layer, status item integration, toolbar icon rendering, menu UI, and settings UI
 
 This keeps probing and diagnosis testable while letting the app layer stay focused on state mapping and presentation.
 
@@ -22,6 +22,7 @@ Sources/
     App/
     Icon/
     Menu/
+    Settings/
     StatusItem/
     Store/
 Tests/
@@ -48,7 +49,7 @@ HealthStore (@MainActor, @Observable)
    ├─ ToolbarVisualStateBuilder
    └─ MenuPresentationBuilder
    ↓
-StatusItemController / SwiftUI menu views / IconRenderer
+StatusItemController / SettingsWindowController / SwiftUI menu + settings views / IconRenderer
 ```
 
 ## Design rules
@@ -83,7 +84,10 @@ The main observable store that:
 - exposes actions like refresh, pause, and resume
 
 ### `StatusItemController`
-Owns the `NSStatusItem`, menu rebuilds, and menu actions.
+Owns the `NSStatusItem`, menu rebuilds, quick actions, and the handoff into the settings window.
+
+### `SettingsWindowController`
+Owns the dedicated AppKit-backed settings window that hosts the SwiftUI settings panes.
 
 ### `ToolbarVisualStateBuilder`
 Maps domain snapshots and one-minute history into the compact toolbar icon contract.

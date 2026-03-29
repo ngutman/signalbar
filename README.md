@@ -46,7 +46,7 @@ SignalBar currently includes:
 - rolling in-memory history graphs
 - two toolbar display modes
 - two toolbar color modes
-- watched target configuration from the menu
+- a dedicated settings window for display, watched-target, and app-level preferences
 - focused tests for diagnosis, aggregation, history, store behavior, and UI mapping
 
 ## How to build and run
@@ -117,7 +117,7 @@ See [docs/privacy.md](docs/privacy.md) for the exact behavior and current limita
 ## Roadmap themes
 
 Near-term work includes:
-- richer settings and target configuration UX
+- richer target configuration UX and additional settings beyond the first dedicated settings window
 - stronger packaging/distribution ergonomics
 - persistent history storage
 - continued diagnosis and scheduler refinement

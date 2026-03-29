@@ -12,7 +12,7 @@ The repository is intended to be usable, buildable, and reviewable in public, bu
 - live DNS probing
 - live internet reachability probing
 - derived quality classification from latency, jitter, and reliability
-- watched-target support
+- watched-target support with a dedicated settings window editor
 - rolling in-memory history graphs
 - pause/resume probing
 - stale-state dimming
@@ -30,7 +30,7 @@ The project is already in good shape for:
 ## Still intentionally early
 
 The following areas are still incomplete or expected to evolve:
-- broader settings/preferences UI
+- broader settings/preferences UI beyond the first dedicated settings window
 - richer target configuration UX
 - persistent history storage
 - fully GitHub-hosted release automation without local operator involvement

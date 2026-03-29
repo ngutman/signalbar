@@ -12,6 +12,7 @@ The current build includes:
 - derived quality signals from latency, jitter, and reliability
 - rolling in-memory timeline history
 - watched target support
+- a dedicated settings window for display, targets, and app-level preferences
 - source-based packaging, signing, and local release verification scripts
 
 ## Build from source
@@ -86,8 +87,8 @@ When the app launches:
 - a menu bar icon appears
 - the app uses live path monitoring by default
 - clicking the icon opens a diagnosis-first overview card
-- configuration controls live under compact submenus
-- the chosen display mode, color style, and paused state are persisted between launches
+- persistent preferences live under `Settings…`
+- the chosen display mode, color style, watched target, and paused state are persisted between launches
 
 ## History views
 
@@ -117,7 +118,7 @@ Available timeline ranges:
 
 ## Watched target
 
-SignalBar supports a basic watched-target flow from the menu.
+SignalBar supports a basic watched-target flow from `Settings… -> Targets`.
 
 You can:
 - add a watched target URL
@@ -125,6 +126,14 @@ You can:
 - remove the watched target
 
 When the core internet path looks healthy but the watched target fails, SignalBar surfaces a **service-specific issue** and shows the watched-target badge in the toolbar.
+
+## Settings window
+
+The current settings window includes:
+- **General** — pause probing and app behavior notes
+- **Display** — toolbar icon and color style
+- **Targets** — watched-target configuration
+- **About** — app links and build/version information
 
 ## More docs
 

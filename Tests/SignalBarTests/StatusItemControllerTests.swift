@@ -19,6 +19,24 @@ final class StatusItemControllerTests: XCTestCase {
         NSStatusBar.system.removeStatusItem(controller.debugStatusItem)
     }
 
+    func test_settingsMenuItemInvokesHandler() {
+        let defaults = UserDefaults(suiteName: #function)!
+        defaults.removePersistentDomain(forName: #function)
+
+        let store = HealthStore(userDefaults: defaults)
+        var didOpenSettings = false
+        let controller = StatusItemController(store: store) {
+            didOpenSettings = true
+        }
+        controller.menuWillOpen(controller.debugMenu)
+
+        XCTAssertTrue(controller.debugMenu.items.contains(where: { $0.title == "Settings…" }))
+        controller.openSettings()
+        XCTAssertTrue(didOpenSettings)
+
+        NSStatusBar.system.removeStatusItem(controller.debugStatusItem)
+    }
+
     func test_menuCardResizesWhenHistoryMetricChanges() throws {
         let defaults = UserDefaults(suiteName: #function)!
         defaults.removePersistentDomain(forName: #function)
