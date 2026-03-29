@@ -21,14 +21,16 @@ This is enough for local release validation before any GitHub release process ex
 
 Version information lives in `version.env`.
 
-## End-to-end local release
+## Build and publish releases
 
-Create, sign, and verify a local release artifact:
+SignalBar includes source-first packaging, signing, notarization, and GitHub release scripts.
+
+Create and verify a local signed release:
 ```bash
 ./scripts/release_local.sh
 ```
 
-Create a Gatekeeper-ready public release artifact:
+Create a notarized public release locally:
 ```bash
 ./scripts/release_public.sh
 ```
@@ -38,7 +40,13 @@ Create and publish a notarized GitHub release from your local Mac:
 ./scripts/release_github_local.sh
 ```
 
-Artifacts are written to `dist/`.
+Artifacts are written to `dist/`, and the GitHub flow can upload the final notarized zip to GitHub Releases.
+
+## End-to-end local release
+
+The commands above are the recommended end-to-end release flows.
+
+Use the sections below when you want to run the packaging, signing, verification, notarization, or GitHub publishing steps individually.
 
 ## Individual steps
 
