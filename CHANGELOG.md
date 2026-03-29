@@ -4,6 +4,29 @@ All notable changes to this project will be documented in this file.
 
 The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project follows semantic versioning once public release tags begin.
 
+## [0.2.0] - 2026-03-29
+
+### Added
+- dedicated `Settings…` window with General, Display, Targets, and About panes
+- launch-at-login support from the General settings pane
+- refresh cadence presets plus a custom manual interval setting
+- larger default settings window sizing so the current panes fit more comfortably
+
+### Changed
+- moved release-flow details out of the main README into `docs/releasing.md`
+- refreshed the README screenshot and documentation copy
+- aligned CI/local validation guidance with the actual GitHub Actions workflow
+
+### Fixed
+- fixed CI lint failures in the custom cadence implementation
+
+### Tested
+- `./scripts/lint.sh`
+- shell syntax validation for the CI-checked scripts
+- `swift build`
+- `swift test`
+- GitHub Actions CI on `main`
+
 ## [0.1.0] - 2026-03-29
 
 ### Added
