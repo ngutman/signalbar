@@ -34,12 +34,9 @@ final class StatusItemController: NSObject, NSMenuDelegate {
 
     private func observeStore() {
         withObservationTracking {
-            _ = self.store.sourceMode
-            _ = self.store.previewScenario
             _ = self.store.watchedTarget
             _ = self.store.snapshot
             _ = self.store.toolbarHistorySnapshot
-            _ = self.store.previewUpdatedAt
             _ = self.store.currentDate
             _ = self.store.updatedAt
             _ = self.store.isPaused

@@ -29,11 +29,23 @@ codesign -dv --verbose=4 "$APP_BUNDLE" > "$VERIFY_DIR/codesign-details.txt" 2>&1
 SPCTL_EXIT=0
 spctl --assess --type execute --verbose=4 "$APP_BUNDLE" > "$VERIFY_DIR/spctl.txt" 2>&1 || SPCTL_EXIT=$?
 if [[ $SPCTL_EXIT -ne 0 ]]; then
+  if [[ "${SIGNALBAR_EXPECT_GATEKEEPER:-0}" == "1" ]]; then
+    echo "ERROR: spctl assessment failed. See $VERIFY_DIR/spctl.txt" >&2
+    exit 1
+  fi
   echo "WARN: spctl assessment did not pass. See $VERIFY_DIR/spctl.txt"
+fi
+
+if [[ "${SIGNALBAR_EXPECT_NOTARIZED:-0}" == "1" ]]; then
+  xcrun stapler validate "$APP_BUNDLE" > "$VERIFY_DIR/stapler.txt" 2>&1
 fi
 
 ditto -x -k "$ZIP_PATH" "$EXTRACT_DIR"
 codesign --verify --deep --strict --verbose=2 "$EXTRACTED_APP"
+
+if [[ "${SIGNALBAR_EXPECT_NOTARIZED:-0}" == "1" ]]; then
+  xcrun stapler validate "$EXTRACTED_APP" >> "$VERIFY_DIR/stapler.txt" 2>&1
+fi
 
 cleanup() {
   pkill -f "${APP_NAME}.app/Contents/MacOS/${APP_NAME}" 2>/dev/null || true

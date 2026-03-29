@@ -3,7 +3,6 @@ import SignalBarCore
 
 @MainActor
 final class SettingsStore {
-    private static let sourceModeDefaultsKey = "healthSourceMode"
     private static let displayModeDefaultsKey = "menuBarDisplayMode"
     private static let colorModeDefaultsKey = "menuBarColorMode"
     private static let timelineWindowDefaultsKey = "timelineWindow"
@@ -13,7 +12,6 @@ final class SettingsStore {
 
     private let userDefaults: UserDefaults
 
-    private(set) var sourceMode: HealthSourceMode
     private(set) var watchedTarget: ProbeTarget?
     private(set) var timelineWindow: HistoryWindow
     private(set) var historyMetric: HistoryMetric
@@ -23,18 +21,12 @@ final class SettingsStore {
 
     init(userDefaults: UserDefaults = .standard) {
         self.userDefaults = userDefaults
-        sourceMode = Self.loadSourceMode(from: userDefaults)
         watchedTarget = Self.loadWatchedTarget(from: userDefaults)
         timelineWindow = Self.loadTimelineWindow(from: userDefaults)
         historyMetric = Self.loadHistoryMetric(from: userDefaults)
         displayMode = Self.loadDisplayMode(from: userDefaults)
         colorMode = Self.loadColorMode(from: userDefaults)
         isPaused = Self.loadIsPaused(from: userDefaults)
-    }
-
-    func setSourceMode(_ sourceMode: HealthSourceMode) {
-        self.sourceMode = sourceMode
-        userDefaults.set(sourceMode.rawValue, forKey: Self.sourceModeDefaultsKey)
     }
 
     func setWatchedTarget(_ watchedTarget: ProbeTarget?) {
@@ -65,15 +57,6 @@ final class SettingsStore {
     func setPaused(_ isPaused: Bool) {
         self.isPaused = isPaused
         userDefaults.set(isPaused, forKey: Self.pausedDefaultsKey)
-    }
-
-    private static func loadSourceMode(from userDefaults: UserDefaults) -> HealthSourceMode {
-        guard let rawValue = userDefaults.string(forKey: sourceModeDefaultsKey),
-              let sourceMode = HealthSourceMode(rawValue: rawValue)
-        else {
-            return .defaultValue
-        }
-        return sourceMode
     }
 
     private static func loadDisplayMode(from userDefaults: UserDefaults) -> MenuBarDisplayMode {

@@ -79,7 +79,7 @@ The main observable store that:
 - starts the engine
 - consumes `AsyncStream<HealthSnapshot>`
 - persists lightweight settings via `SettingsStore`
-- derives stale state and preview/live behavior
+- derives stale state for the live snapshot path
 - exposes actions like refresh, pause, and resume
 
 ### `StatusItemController`

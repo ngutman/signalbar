@@ -7,14 +7,13 @@ The repository is intended to be usable, buildable, and reviewable in public, bu
 ## Implemented today
 
 - live menu bar app for macOS 14+
-- semantic four-layer toolbar icon
+- segmented-line toolbar icon by default, with semantic bars also available
 - live path monitoring
 - live DNS probing
 - live internet reachability probing
 - derived quality classification from latency, jitter, and reliability
 - watched-target support
 - rolling in-memory history graphs
-- preview/debug scenarios
 - pause/resume probing
 - stale-state dimming
 - source-based packaging, signing, and verification scripts

@@ -3,15 +3,6 @@ import SignalBarCore
 
 @MainActor
 extension StatusItemController {
-    @objc func selectSourceMode(_ sender: NSMenuItem) {
-        guard let rawValue = sender.representedObject as? String,
-              let sourceMode = HealthSourceMode(rawValue: rawValue)
-        else {
-            return
-        }
-        store.setSourceMode(sourceMode)
-    }
-
     @objc func selectDisplayMode(_ sender: NSMenuItem) {
         guard let rawValue = sender.representedObject as? String,
               let displayMode = MenuBarDisplayMode(rawValue: rawValue)
@@ -93,19 +84,6 @@ extension StatusItemController {
         alert.informativeText = message
         alert.addButton(withTitle: "OK")
         alert.runModal()
-    }
-
-    @objc func selectPreviewScenario(_ sender: NSMenuItem) {
-        guard let rawValue = sender.representedObject as? String,
-              let scenario = PreviewScenario(rawValue: rawValue)
-        else {
-            return
-        }
-        store.setPreviewScenario(scenario)
-    }
-
-    @objc func advancePreviewState() {
-        store.advanceToNextScenario()
     }
 
     @objc func refreshNow() {

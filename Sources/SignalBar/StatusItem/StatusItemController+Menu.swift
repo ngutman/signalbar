@@ -18,7 +18,6 @@ extension StatusItemController {
             action: #selector(togglePauseProbing),
             keyEquivalent: "")
         pauseItem.target = self
-        pauseItem.isEnabled = store.sourceMode == .livePath
         menu.addItem(pauseItem)
 
         let copyItem = NSMenuItem(
@@ -33,10 +32,6 @@ extension StatusItemController {
         let optionsItem = NSMenuItem(title: "Options", action: nil, keyEquivalent: "")
         optionsItem.submenu = makeOptionsMenu()
         menu.addItem(optionsItem)
-
-        let previewItem = NSMenuItem(title: "Preview & debug", action: nil, keyEquivalent: "")
-        previewItem.submenu = makePreviewDebugMenu()
-        menu.addItem(previewItem)
 
         menu.addItem(.separator())
 
@@ -53,11 +48,11 @@ extension StatusItemController {
 
     func makeMenuCardItem(_ view: some View, width: CGFloat) -> NSMenuItem {
         let item = NSMenuItem()
-        let hostingView = MenuCardHostingView(rootView: view)
+        let hostingView = MenuCardHostingView(rootView: AnyView(view))
+        hostingView.menuWidth = width
         hostingView.frame = NSRect(x: 0, y: 0, width: width, height: 10)
         hostingView.layoutSubtreeIfNeeded()
-        let fittingSize = hostingView.fittingSize
-        hostingView.frame = NSRect(x: 0, y: 0, width: width, height: fittingSize.height)
+        hostingView.applyMeasuredHeight(hostingView.fittingSize.height, width: width)
         item.view = hostingView
         item.isEnabled = true
         return item
@@ -65,10 +60,6 @@ extension StatusItemController {
 
     func makeOptionsMenu() -> NSMenu {
         let menu = NSMenu(title: "Options")
-
-        let sourceItem = NSMenuItem(title: "Source", action: nil, keyEquivalent: "")
-        sourceItem.submenu = makeSourceModeMenu()
-        menu.addItem(sourceItem)
 
         let appearanceItem = NSMenuItem(title: "Appearance", action: nil, keyEquivalent: "")
         appearanceItem.submenu = makeAppearanceMenu()
@@ -92,39 +83,6 @@ extension StatusItemController {
         colorModeItem.submenu = makeColorModeMenu()
         menu.addItem(colorModeItem)
 
-        return menu
-    }
-
-    func makePreviewDebugMenu() -> NSMenu {
-        let menu = NSMenu(title: "Preview & debug")
-
-        let sourceModeItem = NSMenuItem(title: "Preview state", action: nil, keyEquivalent: "")
-        sourceModeItem.submenu = makePreviewScenarioMenu()
-        menu.addItem(sourceModeItem)
-
-        let nextItem = NSMenuItem(
-            title: "Next preview state",
-            action: #selector(advancePreviewState),
-            keyEquivalent: "")
-        nextItem.target = self
-        nextItem.isEnabled = store.sourceMode == .preview
-        menu.addItem(nextItem)
-
-        return menu
-    }
-
-    func makeSourceModeMenu() -> NSMenu {
-        let menu = NSMenu(title: "Source")
-        for sourceMode in HealthSourceMode.allCases {
-            let item = NSMenuItem(
-                title: sourceMode.displayName,
-                action: #selector(selectSourceMode(_:)),
-                keyEquivalent: "")
-            item.target = self
-            item.representedObject = sourceMode.rawValue
-            item.state = sourceMode == store.sourceMode ? .on : .off
-            menu.addItem(item)
-        }
         return menu
     }
 
@@ -174,30 +132,42 @@ extension StatusItemController {
         menu.addItem(removeItem)
         return menu
     }
-
-    func makePreviewScenarioMenu() -> NSMenu {
-        let menu = NSMenu(title: "Preview state")
-        for scenario in PreviewScenario.allCases {
-            let item = NSMenuItem(
-                title: scenario.displayName,
-                action: #selector(selectPreviewScenario(_:)),
-                keyEquivalent: "")
-            item.target = self
-            item.representedObject = scenario.rawValue
-            item.state = scenario == store.previewScenario ? .on : .off
-            item.isEnabled = store.sourceMode == .preview
-            menu.addItem(item)
-        }
-        return menu
-    }
 }
 
-private final class MenuCardHostingView<Content: View>: NSHostingView<Content> {
+private final class MenuCardHostingView: NSHostingView<AnyView> {
+    var menuWidth: CGFloat = 0
+    private var isApplyingMeasuredHeight = false
+
     override var allowsVibrancy: Bool {
         true
     }
 
     override func acceptsFirstMouse(for event: NSEvent?) -> Bool {
         true
+    }
+
+    override func layout() {
+        super.layout()
+
+        guard !isApplyingMeasuredHeight, menuWidth > 0 else { return }
+        applyMeasuredHeight(fittingSize.height, width: menuWidth)
+    }
+
+    func applyMeasuredHeight(_ height: CGFloat, width: CGFloat) {
+        let targetHeight = ceil(max(1, height))
+        guard abs(frame.width - width) > 0.5 || abs(frame.height - targetHeight) > 0.5 else {
+            return
+        }
+
+        isApplyingMeasuredHeight = true
+        defer { isApplyingMeasuredHeight = false }
+
+        frame = NSRect(x: 0, y: 0, width: width, height: targetHeight)
+        invalidateIntrinsicContentSize()
+        superview?.needsLayout = true
+        superview?.layoutSubtreeIfNeeded()
+        window?.contentView?.needsLayout = true
+        window?.contentView?.layoutSubtreeIfNeeded()
+        enclosingMenuItem?.menu?.update()
     }
 }

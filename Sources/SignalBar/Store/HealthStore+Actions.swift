@@ -46,16 +46,6 @@ extension HealthStore {
         settingsStore.setHistoryMetric(historyMetric)
     }
 
-    func setSourceMode(_ sourceMode: HealthSourceMode) {
-        self.sourceMode = sourceMode
-        settingsStore.setSourceMode(sourceMode)
-        guard sourceMode == .livePath else { return }
-        Task { @MainActor [weak self] in
-            guard let self else { return }
-            await refreshHistorySnapshots()
-        }
-    }
-
     func setPreviewScenario(_ scenario: PreviewScenario) {
         previewScenario = scenario
         previewUpdatedAt = .now
@@ -99,16 +89,5 @@ extension HealthStore {
     func setColorMode(_ colorMode: MenuBarColorMode) {
         self.colorMode = colorMode
         settingsStore.setColorMode(colorMode)
-    }
-
-    func advanceToNextScenario() {
-        let allCases = PreviewScenario.allCases
-        guard let currentIndex = allCases.firstIndex(of: previewScenario) else {
-            setPreviewScenario(.healthy)
-            return
-        }
-        let nextIndex = allCases.index(after: currentIndex)
-        let wrappedIndex = nextIndex == allCases.endIndex ? allCases.startIndex : nextIndex
-        setPreviewScenario(allCases[wrappedIndex])
     }
 }

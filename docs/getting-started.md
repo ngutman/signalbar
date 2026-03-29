@@ -12,7 +12,6 @@ The current build includes:
 - derived quality signals from latency, jitter, and reliability
 - rolling in-memory timeline history
 - watched target support
-- preview scenarios for icon and menu validation
 - source-based packaging, signing, and local release verification scripts
 
 ## Build from source
@@ -49,8 +48,8 @@ This writes artifacts under `dist/` and verifies the packaged bundle locally.
 
 SignalBar currently supports two toolbar icon styles.
 
-### Semantic bars
-The default mode uses four fixed bars:
+### Segmented lines
+The default mode uses four equal-height segments:
 1. **Link**
 2. **DNS**
 3. **Internet**
@@ -63,10 +62,10 @@ Examples:
 - quality issue: first three healthy, quality degraded
 - watched service issue: core bars healthy with a small badge
 
-In live mode, bar fill reflects the **average quality of the past minute** rather than only the latest instant.
+In live mode, segment fill reflects the **average quality of the past minute** rather than only the latest instant.
 
-### Segmented pipeline
-This mode keeps the same four layers but renders them as equal-height segments so the affected layer is easier to spot.
+### Semantic bars
+This alternative mode uses ascending heights for the same four layers.
 
 ## Toolbar color styles
 
@@ -85,19 +84,10 @@ This mode keeps the same four layers but renders them as equal-height segments s
 
 When the app launches:
 - a menu bar icon appears
-- the app uses **Live path** mode by default
+- the app uses live path monitoring by default
 - clicking the icon opens a diagnosis-first overview card
 - configuration controls live under compact submenus
-- the chosen source, display mode, color style, and paused state are persisted between launches
-
-In **Preview** mode, the app includes these fake states:
-- Healthy
-- Offline
-- DNS failure
-- Internet failure
-- Quality degraded
-- Watched service issue
-- Stale healthy
+- the chosen display mode, color style, and paused state are persisted between launches
 
 ## History views
 

@@ -9,7 +9,7 @@ enum MenuBarDisplayMode: String, CaseIterable, Sendable {
         case .semanticBars:
             "Semantic bars"
         case .segmentedPipeline:
-            "Segmented pipeline"
+            "Segmented lines"
         }
     }
 
@@ -23,6 +23,6 @@ enum MenuBarDisplayMode: String, CaseIterable, Sendable {
     }
 
     static var defaultValue: MenuBarDisplayMode {
-        .semanticBars
+        .segmentedPipeline
     }
 }

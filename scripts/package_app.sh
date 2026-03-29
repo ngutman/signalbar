@@ -12,6 +12,9 @@ APP_NAME="SignalBar"
 APP_BUNDLE="$DIST_DIR/${APP_NAME}.app"
 APP_CONTENTS="$APP_BUNDLE/Contents"
 EXECUTABLE_PATH="$APP_CONTENTS/MacOS/${APP_NAME}"
+ICONSET_DIR="$ROOT_DIR/Resources/AppIcon.iconset"
+ICON_NAME="AppIcon"
+ICON_TARGET="$APP_CONTENTS/Resources/${ICON_NAME}.icns"
 
 ARCH_LIST=( ${ARCHES:-} )
 if [[ ${#ARCH_LIST[@]} -eq 0 ]]; then
@@ -46,6 +49,10 @@ resolve_binary() {
 
 mkdir -p "$APP_CONTENTS/MacOS" "$APP_CONTENTS/Resources"
 
+if [[ -d "$ICONSET_DIR" ]]; then
+  xcrun iconutil --convert icns --output "$ICON_TARGET" "$ICONSET_DIR"
+fi
+
 if [[ ${#ARCH_LIST[@]} -eq 1 ]]; then
   cp "$(resolve_binary "$CONFIGURATION" "${ARCH_LIST[0]}")" "$EXECUTABLE_PATH"
 else
@@ -74,6 +81,7 @@ cat > "$APP_CONTENTS/Info.plist" <<PLIST
     <key>CFBundleVersion</key><string>${BUILD_NUMBER}</string>
     <key>LSMinimumSystemVersion</key><string>14.0</string>
     <key>LSUIElement</key><true/>
+    <key>CFBundleIconFile</key><string>${ICON_NAME}</string>
     <key>NSHighResolutionCapable</key><true/>
     <key>SignalBarBuildTimestamp</key><string>${BUILD_TIMESTAMP}</string>
     <key>SignalBarGitCommit</key><string>${GIT_COMMIT}</string>

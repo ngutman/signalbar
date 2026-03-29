@@ -10,8 +10,7 @@ final class SettingsStoreTests: XCTestCase {
 
         let store = SettingsStore(userDefaults: defaults)
 
-        XCTAssertEqual(store.sourceMode, .livePath)
-        XCTAssertEqual(store.displayMode, .semanticBars)
+        XCTAssertEqual(store.displayMode, .segmentedPipeline)
         XCTAssertEqual(store.colorMode, .monochrome)
         XCTAssertEqual(store.timelineWindow, .oneMinute)
         XCTAssertEqual(store.historyMetric, .ping)
@@ -34,8 +33,7 @@ final class SettingsStoreTests: XCTestCase {
             timeout: 3.0)
 
         let first = SettingsStore(userDefaults: defaults)
-        first.setSourceMode(.preview)
-        first.setDisplayMode(.segmentedPipeline)
+        first.setDisplayMode(.semanticBars)
         first.setColorMode(.mutedAccent)
         first.setTimelineWindow(.sixtyMinutes)
         first.setHistoryMetric(.jitter)
@@ -43,8 +41,7 @@ final class SettingsStoreTests: XCTestCase {
         first.setPaused(true)
 
         let second = SettingsStore(userDefaults: defaults)
-        XCTAssertEqual(second.sourceMode, .preview)
-        XCTAssertEqual(second.displayMode, .segmentedPipeline)
+        XCTAssertEqual(second.displayMode, .semanticBars)
         XCTAssertEqual(second.colorMode, .mutedAccent)
         XCTAssertEqual(second.timelineWindow, .sixtyMinutes)
         XCTAssertEqual(second.historyMetric, .jitter)

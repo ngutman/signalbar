@@ -16,10 +16,7 @@ struct MenuOverviewCardView: View {
 
     private var badges: [MenuHeaderBadgeState] {
         var badges: [MenuHeaderBadgeState] = []
-        if store.sourceMode == .preview {
-            badges.append(.init(label: "Preview", tone: .accent))
-        }
-        if store.sourceMode == .livePath, store.isPaused {
+        if store.isPaused {
             badges.append(.init(label: "Paused", tone: .warning))
         } else if store.toolbarState.isDimmed {
             badges.append(.init(label: "Stale", tone: .warning))

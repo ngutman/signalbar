@@ -12,6 +12,7 @@ APP_BUNDLE="$DIST_DIR/${APP_NAME}.app"
 APP_EXECUTABLE="$APP_BUNDLE/Contents/MacOS/${APP_NAME}"
 ZIP_PATH="$DIST_DIR/${APP_NAME}-${MARKETING_VERSION}.zip"
 SUMMARY_PATH="$DIST_DIR/signing-summary.txt"
+NOTARIZE_ZIP_PATH="$DIST_DIR/${APP_NAME}-${MARKETING_VERSION}-notarize.zip"
 
 if [[ ! -d "$APP_BUNDLE" ]]; then
   "$ROOT_DIR/scripts/package_app.sh"
@@ -51,9 +52,7 @@ sign_path() {
 sign_path "$APP_EXECUTABLE"
 sign_path "$APP_BUNDLE"
 
-rm -f "$ZIP_PATH" "$ZIP_PATH.sha256"
-ditto -c -k --keepParent --sequesterRsrc "$APP_BUNDLE" "$ZIP_PATH"
-shasum -a 256 "$ZIP_PATH" > "$ZIP_PATH.sha256"
+rm -f "$ZIP_PATH" "$ZIP_PATH.sha256" "$NOTARIZE_ZIP_PATH"
 
 {
   echo "signing_mode=$SIGNING_MODE"
@@ -71,9 +70,15 @@ if [[ "${SIGNALBAR_NOTARIZE:-0}" == "1" ]]; then
     echo "ERROR: set SIGNALBAR_NOTARY_PROFILE to a notarytool keychain profile name." >&2
     exit 1
   fi
-  xcrun notarytool submit "$ZIP_PATH" --keychain-profile "$SIGNALBAR_NOTARY_PROFILE" --wait
+
+  ditto -c -k --keepParent --sequesterRsrc "$APP_BUNDLE" "$NOTARIZE_ZIP_PATH"
+  xcrun notarytool submit "$NOTARIZE_ZIP_PATH" --keychain-profile "$SIGNALBAR_NOTARY_PROFILE" --wait
   xcrun stapler staple "$APP_BUNDLE"
+  xcrun stapler validate "$APP_BUNDLE"
 fi
+
+ditto -c -k --keepParent --sequesterRsrc "$APP_BUNDLE" "$ZIP_PATH"
+shasum -a 256 "$ZIP_PATH" > "$ZIP_PATH.sha256"
 
 echo "Signed app bundle: $APP_BUNDLE"
 echo "Signed zip artifact: $ZIP_PATH"

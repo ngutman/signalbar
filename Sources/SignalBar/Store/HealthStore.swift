@@ -37,7 +37,7 @@ final class HealthStore {
         let resolvedSettingsStore = settingsStore ?? SettingsStore(userDefaults: userDefaults)
         self.settingsStore = resolvedSettingsStore
         self.healthEngine = healthEngine
-        self.sourceMode = sourceMode ?? resolvedSettingsStore.sourceMode
+        self.sourceMode = sourceMode ?? .livePath
         self.previewScenario = previewScenario
         watchedTarget = resolvedSettingsStore.watchedTarget
         snapshot = nil

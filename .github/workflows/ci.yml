@@ -35,10 +35,13 @@ jobs:
         run: |
           bash -n run-menubar.sh
           bash -n stop-menubar.sh
+          bash -n scripts/check_release_prereqs.sh
+          bash -n scripts/setup_notarytool_profile.sh
           bash -n scripts/package_app.sh
           bash -n scripts/sign_release.sh
           bash -n scripts/verify_release.sh
           bash -n scripts/release_local.sh
+          bash -n scripts/release_public.sh
           bash -n scripts/render_screenshots.sh
 
       - name: Build

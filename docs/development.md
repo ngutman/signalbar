@@ -2,7 +2,7 @@
 
 ## Requirements
 - macOS 14+
-- Xcode 26+ or a compatible Swift 6.2+ toolchain
+- Xcode 16.1+ or a compatible Swift 6.1+ toolchain
 - Homebrew packages recommended for linting:
   - `swiftformat`
   - `swiftlint`
@@ -54,6 +54,11 @@ swift test
 ### Build and verify a local signed release
 ```bash
 ./scripts/release_local.sh
+```
+
+### Build and verify a notarized public release
+```bash
+SIGNALBAR_NOTARY_PROFILE=signalbar-notary ./scripts/release_public.sh
 ```
 
 ## Validation checklist

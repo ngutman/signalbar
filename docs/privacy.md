@@ -35,7 +35,6 @@ SignalBar currently does **not**:
 ## Local storage
 
 Today, SignalBar stores only lightweight local preferences such as:
-- source mode
 - display mode
 - color mode
 - selected history metric/window

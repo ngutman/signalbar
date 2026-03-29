@@ -47,14 +47,13 @@ SignalBar currently includes:
 - two toolbar display modes
 - two toolbar color modes
 - watched target configuration from the menu
-- preview/debug scenarios for validating icon and menu behavior
 - focused tests for diagnosis, aggregation, history, store behavior, and UI mapping
 
 ## How to build and run
 
 ### Requirements
 - macOS 14+
-- Xcode 26+ or a compatible Swift 6.2+ toolchain
+- Xcode 16.1+ or a compatible Swift 6.1+ toolchain
 
 ### Validate the repository
 ```bash

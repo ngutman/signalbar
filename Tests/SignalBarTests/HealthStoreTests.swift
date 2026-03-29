@@ -13,18 +13,6 @@ final class HealthStoreTests: XCTestCase {
         XCTAssertEqual(store.sourceMode, .livePath)
     }
 
-    func test_sourceModePersistsAcrossStoreInstances() {
-        let suiteName = "HealthStoreTests-\(#function)"
-        let defaults = UserDefaults(suiteName: suiteName)!
-        defaults.removePersistentDomain(forName: suiteName)
-
-        let firstStore = HealthStore(userDefaults: defaults)
-        firstStore.setSourceMode(.preview)
-
-        let secondStore = HealthStore(userDefaults: defaults)
-        XCTAssertEqual(secondStore.sourceMode, .preview)
-    }
-
     func test_watchedTargetDefaultsToNil() {
         let defaults = UserDefaults(suiteName: #function)!
         defaults.removePersistentDomain(forName: #function)
@@ -98,13 +86,13 @@ final class HealthStoreTests: XCTestCase {
         XCTAssertEqual(secondStore.timelineWindow, .sixtyMinutes)
     }
 
-    func test_displayModeDefaultsToSemanticBars() {
+    func test_displayModeDefaultsToSegmentedLines() {
         let defaults = UserDefaults(suiteName: #function)!
         defaults.removePersistentDomain(forName: #function)
 
         let store = HealthStore(userDefaults: defaults)
 
-        XCTAssertEqual(store.displayMode, .semanticBars)
+        XCTAssertEqual(store.displayMode, .segmentedPipeline)
     }
 
     func test_displayModePersistsAcrossStoreInstances() {
