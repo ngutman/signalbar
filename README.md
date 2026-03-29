@@ -17,7 +17,7 @@ If your core path is healthy but a watched service is not, SignalBar keeps the c
 > SignalBar is still an early public prototype. The core architecture and test coverage are solid, but packaging, broader settings UX, and persistent history are still evolving.
 
 <p align="center">
-  <img src="docs/screenshots/menu-overview.png" alt="SignalBar overview menu screenshot" width="520" />
+  <img src="docs/screenshots/readme-menu-jitter.png" alt="SignalBar menu screenshot showing healthy layers with jitter history and per-target contributors" width="460" />
 </p>
 
 ## Why SignalBar exists
