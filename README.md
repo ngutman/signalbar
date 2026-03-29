@@ -72,16 +72,26 @@ swift test
 ./stop-menubar.sh
 ```
 
-## Build a local signed release artifact
+## Build and publish releases
 
-SignalBar includes source-first packaging and signing scripts.
+SignalBar includes source-first packaging, signing, notarization, and GitHub release scripts.
 
 Create and verify a local signed release:
 ```bash
 ./scripts/release_local.sh
 ```
 
-This produces release artifacts under `dist/` and runs bundle + zip verification. For public Gatekeeper-ready distribution, you will still want `Developer ID Application` signing plus notarization. See [docs/releasing.md](docs/releasing.md) for details.
+Create a notarized public release locally:
+```bash
+./scripts/release_public.sh
+```
+
+Create and publish a notarized GitHub release from your local Mac:
+```bash
+./scripts/release_github_local.sh
+```
+
+This produces release artifacts under `dist/` and can upload the final notarized zip to GitHub Releases. See [docs/releasing.md](docs/releasing.md) for details.
 
 ## Repository guide
 

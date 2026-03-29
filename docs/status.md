@@ -16,7 +16,7 @@ The repository is intended to be usable, buildable, and reviewable in public, bu
 - rolling in-memory history graphs
 - pause/resume probing
 - stale-state dimming
-- source-based packaging, signing, and verification scripts
+- source-based packaging, signing, notarization, verification, and local GitHub release scripts
 
 ## Good enough for public review
 
@@ -33,7 +33,7 @@ The following areas are still incomplete or expected to evolve:
 - broader settings/preferences UI
 - richer target configuration UX
 - persistent history storage
-- public release distribution and notarization polish
+- fully GitHub-hosted release automation without local operator involvement
 - more advanced scheduler/backoff behavior
 - broader documentation and user onboarding polish over time
 
@@ -41,7 +41,7 @@ The following areas are still incomplete or expected to evolve:
 
 1. continue runtime orchestration cleanup
 2. improve scheduler/backoff behavior
-3. improve packaging/release ergonomics
+3. add optional GitHub-hosted release automation later
 4. add persistent history
 5. continue UI and configuration polish
 
