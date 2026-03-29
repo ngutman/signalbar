@@ -36,6 +36,15 @@ struct SettingsGeneralPane: View {
             set: { store.setCustomRefreshCadenceIntervalSeconds($0) })
     }
 
+    private var customIntervalSubtitle: String {
+        let range = RefreshCadenceProfile.customIntervalRange
+        return [
+            "Enter \(range.lowerBound)–\(range.upperBound) seconds.",
+            "Applies to each default control target and the watched target.",
+            "SignalBar staggers the default control targets across this interval."
+        ].joined(separator: " ")
+    }
+
     var body: some View {
         ScrollView(.vertical, showsIndicators: true) {
             VStack(alignment: .leading, spacing: 16) {
@@ -95,7 +104,7 @@ struct SettingsGeneralPane: View {
                     if store.refreshCadenceProfile == .custom {
                         SettingsPickerRow(
                             title: "Custom interval",
-                            subtitle: "Enter \(RefreshCadenceProfile.customIntervalRange.lowerBound)–\(RefreshCadenceProfile.customIntervalRange.upperBound) seconds. Applies to each default control target and the watched target. SignalBar staggers the default control targets across this interval.")
+                            subtitle: customIntervalSubtitle)
                         {
                             HStack(spacing: 8) {
                                 TextField("Seconds", value: customRefreshCadenceIntervalBinding, format: .number)

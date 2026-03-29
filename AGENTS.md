@@ -41,6 +41,23 @@
 - Before handoff on code changes, run the relevant checks that exist in the repo:
   - `swift build`
   - `swift test`
+- To verify the current GitHub Actions CI job will pass locally, run the same categories of checks as `.github/workflows/ci.yml`:
+  - `./scripts/lint.sh`
+  - `bash -n run-menubar.sh`
+  - `bash -n stop-menubar.sh`
+  - `bash -n scripts/release_common.sh`
+  - `bash -n scripts/check_release_prereqs.sh`
+  - `bash -n scripts/setup_notarytool_profile.sh`
+  - `bash -n scripts/package_app.sh`
+  - `bash -n scripts/sign_release.sh`
+  - `bash -n scripts/verify_release.sh`
+  - `bash -n scripts/release_local.sh`
+  - `bash -n scripts/release_public.sh`
+  - `bash -n scripts/publish_github_release.sh`
+  - `bash -n scripts/release_github_local.sh`
+  - `bash -n scripts/render_screenshots.sh`
+  - `swift build`
+  - `swift test`
 - For docs-only changes, build/test is optional unless the user asks for validation.
 
 ## Coding Style & Architecture

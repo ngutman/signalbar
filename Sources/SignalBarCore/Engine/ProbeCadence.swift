@@ -34,7 +34,9 @@ public struct ProbeCadenceConfiguration: Sendable, Equatable {
     }
 
     public static func clampCustomIntervalSeconds(_ customIntervalSeconds: Int) -> Int {
-        min(max(customIntervalSeconds, RefreshCadenceProfile.customIntervalRange.lowerBound), RefreshCadenceProfile.customIntervalRange.upperBound)
+        min(
+            max(customIntervalSeconds, RefreshCadenceProfile.customIntervalRange.lowerBound),
+            RefreshCadenceProfile.customIntervalRange.upperBound)
     }
 }
 
@@ -62,7 +64,7 @@ struct ProbeCadenceResolver {
                 initialOffset: interval * Double(targetIndex) / Double(controlCount))
 
         case .custom, .watched:
-            let controlCount = max(activeTargets.filter { $0.kind == .control }.count, 1)
+            let controlCount = max(activeTargets.count(where: { $0.kind == .control }), 1)
             return EffectiveProbeSchedule(
                 interval: interval,
                 initialOffset: interval / Double(controlCount * 2))

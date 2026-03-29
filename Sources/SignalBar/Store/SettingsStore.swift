@@ -10,7 +10,7 @@ final class SettingsStore {
     private static let watchedTargetDefaultsKey = "watchedTarget"
     private static let pausedDefaultsKey = "isPaused"
     private static let refreshCadenceProfileDefaultsKey = "refreshCadenceProfile"
-    private static let customRefreshCadenceIntervalSecondsDefaultsKey = "customRefreshCadenceIntervalSeconds"
+    private static let customCadenceIntervalDefaultsKey = "customRefreshCadenceIntervalSeconds"
     private static let lowPowerModeBackoffEnabledDefaultsKey = "lowPowerModeBackoffEnabled"
 
     private let userDefaults: UserDefaults
@@ -74,9 +74,12 @@ final class SettingsStore {
     }
 
     func setCustomRefreshCadenceIntervalSeconds(_ customRefreshCadenceIntervalSeconds: Int) {
-        let clampedIntervalSeconds = ProbeCadenceConfiguration.clampCustomIntervalSeconds(customRefreshCadenceIntervalSeconds)
+        let clampedIntervalSeconds = ProbeCadenceConfiguration.clampCustomIntervalSeconds(
+            customRefreshCadenceIntervalSeconds)
         self.customRefreshCadenceIntervalSeconds = clampedIntervalSeconds
-        userDefaults.set(clampedIntervalSeconds, forKey: Self.customRefreshCadenceIntervalSecondsDefaultsKey)
+        userDefaults.set(
+            clampedIntervalSeconds,
+            forKey: Self.customCadenceIntervalDefaultsKey)
     }
 
     func setLowPowerModeBackoffEnabled(_ lowPowerModeBackoffEnabled: Bool) {
@@ -139,7 +142,7 @@ final class SettingsStore {
     }
 
     private static func loadCustomRefreshCadenceIntervalSeconds(from userDefaults: UserDefaults) -> Int {
-        let storedValue = userDefaults.integer(forKey: customRefreshCadenceIntervalSecondsDefaultsKey)
+        let storedValue = userDefaults.integer(forKey: customCadenceIntervalDefaultsKey)
         if storedValue == 0 {
             return RefreshCadenceProfile.defaultCustomIntervalSeconds
         }

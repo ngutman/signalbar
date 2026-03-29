@@ -107,7 +107,8 @@ extension HealthStore {
     }
 
     func setCustomRefreshCadenceIntervalSeconds(_ customRefreshCadenceIntervalSeconds: Int) {
-        let clampedIntervalSeconds = ProbeCadenceConfiguration.clampCustomIntervalSeconds(customRefreshCadenceIntervalSeconds)
+        let clampedIntervalSeconds = ProbeCadenceConfiguration.clampCustomIntervalSeconds(
+            customRefreshCadenceIntervalSeconds)
         guard self.customRefreshCadenceIntervalSeconds != clampedIntervalSeconds else { return }
         self.customRefreshCadenceIntervalSeconds = clampedIntervalSeconds
         settingsStore.setCustomRefreshCadenceIntervalSeconds(clampedIntervalSeconds)
