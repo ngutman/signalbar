@@ -6,12 +6,15 @@ The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-03-30
+
 ### Fixed
 - prevent stalled DNS/HTTP probe sweeps from leaving the app stale while the engine hot-spins on overdue work
 
 ### Tested
 - `./scripts/lint.sh`
 - `swift test`
+- local notarized GitHub release packaging and publishing
 
 ## [0.2.0] - 2026-03-29
 
