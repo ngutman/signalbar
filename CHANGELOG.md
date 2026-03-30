@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project follows semantic versioning once public release tags begin.
 
+## [Unreleased]
+
+### Fixed
+- prevent stalled DNS/HTTP probe sweeps from leaving the app stale while the engine hot-spins on overdue work
+
+### Tested
+- `./scripts/lint.sh`
+- `swift test`
+
 ## [0.2.0] - 2026-03-29
 
 ### Added

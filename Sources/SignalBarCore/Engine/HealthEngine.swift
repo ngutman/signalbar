@@ -5,6 +5,7 @@ public actor HealthEngine {
     private let dnsProbeRunner: any DNSProbing
     private let httpProbeRunner: any HTTPProbing
     private let controlTargets: [ProbeTarget]
+    private let probeTimeoutGraceInterval: TimeInterval
     private let dnsHistoryLimit = 8
     private let httpHistoryLimit = 8
 
@@ -29,12 +30,14 @@ public actor HealthEngine {
         httpProbeRunner: any HTTPProbing = HTTPProbeRunner(),
         controlTargets: [ProbeTarget] = ProbeTarget.defaultControlTargets,
         watchedTarget: ProbeTarget? = nil,
-        cadenceConfiguration: ProbeCadenceConfiguration = ProbeCadenceConfiguration())
+        cadenceConfiguration: ProbeCadenceConfiguration = ProbeCadenceConfiguration(),
+        probeTimeoutGraceInterval: TimeInterval = 0.5)
     {
         self.pathMonitor = pathMonitor
         self.dnsProbeRunner = dnsProbeRunner
         self.httpProbeRunner = httpProbeRunner
         self.controlTargets = controlTargets
+        self.probeTimeoutGraceInterval = probeTimeoutGraceInterval
         self.watchedTarget = watchedTarget
         self.cadenceConfiguration = cadenceConfiguration
     }
@@ -147,6 +150,17 @@ public actor HealthEngine {
     private func nextDueDate(for kind: ProbeScheduler.SweepKind) async -> Date? {
         guard !isPaused else { return nil }
         guard let currentPath, currentPath.status == .satisfied else { return nil }
+
+        let isSweepInFlight = switch kind {
+        case .dns:
+            isDNSSweepInFlight
+        case .http:
+            isHTTPSweepInFlight
+        }
+        if isSweepInFlight {
+            return .now.addingTimeInterval(max(0.25, probeTimeoutGraceInterval))
+        }
+
         let activeTargets = activeTargetsForProbing()
         guard !activeTargets.isEmpty else { return nil }
         return scheduler.nextDueDate(for: kind, among: activeTargets, now: .now)
@@ -193,8 +207,12 @@ public actor HealthEngine {
         let probeResults = await withTaskGroup(of: DNSProbeResult.self, returning: [DNSProbeResult].self) { group in
             for target in dueTargets {
                 let runner = self.dnsProbeRunner
+                let timeoutInterval = self.fallbackTimeoutInterval(for: target)
                 group.addTask {
-                    await runner.probe(target: target)
+                    await Self.probeDNSResult(
+                        for: target,
+                        runner: runner,
+                        timeoutInterval: timeoutInterval)
                 }
             }
 
@@ -232,8 +250,12 @@ public actor HealthEngine {
         let probeResults = await withTaskGroup(of: HTTPProbeResult.self, returning: [HTTPProbeResult].self) { group in
             for target in dueTargets {
                 let runner = self.httpProbeRunner
+                let timeoutInterval = self.fallbackTimeoutInterval(for: target)
                 group.addTask {
-                    await runner.probe(target: target)
+                    await Self.probeHTTPResult(
+                        for: target,
+                        runner: runner,
+                        timeoutInterval: timeoutInterval)
                 }
             }
 
@@ -255,6 +277,90 @@ public actor HealthEngine {
             appendHTTPResult(result)
         }
         emitSnapshot()
+    }
+
+    private static func probeDNSResult(
+        for target: ProbeTarget,
+        runner: any DNSProbing,
+        timeoutInterval: TimeInterval)
+        async -> DNSProbeResult
+    {
+        let startedAt = Date.now
+
+        return await withTaskGroup(of: DNSProbeResult.self, returning: DNSProbeResult.self) { group in
+            group.addTask {
+                await runner.probe(target: target)
+            }
+            group.addTask {
+                try? await Task.sleep(for: .seconds(timeoutInterval))
+                return DNSProbeResult(
+                    targetID: target.id,
+                    startedAt: startedAt,
+                    durationMs: max(0, timeoutInterval * 1000),
+                    success: false,
+                    resolvedAddresses: 0,
+                    failure: .timeout)
+            }
+
+            let result = await group.next() ?? DNSProbeResult(
+                targetID: target.id,
+                startedAt: startedAt,
+                durationMs: max(0, timeoutInterval * 1000),
+                success: false,
+                resolvedAddresses: 0,
+                failure: .unknown)
+            group.cancelAll()
+            return result
+        }
+    }
+
+    private static func probeHTTPResult(
+        for target: ProbeTarget,
+        runner: any HTTPProbing,
+        timeoutInterval: TimeInterval)
+        async -> HTTPProbeResult
+    {
+        let startedAt = Date.now
+
+        return await withTaskGroup(of: HTTPProbeResult.self, returning: HTTPProbeResult.self) { group in
+            group.addTask {
+                await runner.probe(target: target)
+            }
+            group.addTask {
+                try? await Task.sleep(for: .seconds(timeoutInterval))
+                return HTTPProbeResult(
+                    targetID: target.id,
+                    startedAt: startedAt,
+                    dnsMs: nil,
+                    connectMs: nil,
+                    tlsMs: nil,
+                    firstByteMs: nil,
+                    totalMs: max(0, timeoutInterval * 1000),
+                    statusCode: nil,
+                    success: false,
+                    reusedConnection: false,
+                    failure: .timeout)
+            }
+
+            let result = await group.next() ?? HTTPProbeResult(
+                targetID: target.id,
+                startedAt: startedAt,
+                dnsMs: nil,
+                connectMs: nil,
+                tlsMs: nil,
+                firstByteMs: nil,
+                totalMs: max(0, timeoutInterval * 1000),
+                statusCode: nil,
+                success: false,
+                reusedConnection: false,
+                failure: .unknown)
+            group.cancelAll()
+            return result
+        }
+    }
+
+    private func fallbackTimeoutInterval(for target: ProbeTarget) -> TimeInterval {
+        max(target.timeout + probeTimeoutGraceInterval, target.timeout)
     }
 
     private func appendDNSResult(_ result: DNSProbeResult) {
